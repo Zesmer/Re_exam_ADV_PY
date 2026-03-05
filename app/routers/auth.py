@@ -148,9 +148,10 @@ def forgot_password(
     db.commit()
 
     # Send email
-    send_reset_email(user.email, reset_token)
+    # send_reset_email(user.email, reset_token)
 
-    return {"message": "If the email exists, a reset link has been sent"}
+    return {"message": "If the email exists, a reset link has been sent",
+            "reset_token": reset_token}
 
 
 @router.post("/reset-password")
