@@ -12,6 +12,9 @@ class User(Base):
     is_admin = Column(Boolean, default=False)
     phone = Column(String, nullable=True)
     address = Column(Text, nullable=True)
+    # Password Reset Fields
+    reset_password_token = Column(String, nullable=True)
+    reset_password_expires = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     orders = relationship("Order", back_populates="user")
     cart = relationship("Cart", back_populates="user", uselist=False)

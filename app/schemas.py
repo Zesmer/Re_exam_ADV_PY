@@ -2,6 +2,7 @@ from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from datetime import datetime
 
+
 # --- Auth ---
 class Token(BaseModel):
     access_token: str
@@ -26,6 +27,14 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+class ForgotPassword(BaseModel):
+    email: EmailStr
+
+class ResetPassword(BaseModel):
+    token: str
+    new_password: str
+    confirm_password: str
+
 class UserDisplay(BaseModel):
     id: int
     email: str
@@ -35,7 +44,6 @@ class UserDisplay(BaseModel):
     created_at: datetime
     class Config:
         from_attributes = True
-
 # --- Category ---
 class CategoryBase(BaseModel):
     name: str
