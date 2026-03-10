@@ -8,24 +8,27 @@ router = APIRouter(prefix="/front", tags=["Customer API"])
 
 @router.get("/category-list", response_model=List[schemas.CategoryDisplay])
 def get_categories(db: Session = Depends(database.get_db)):
-    if db.query(models.Category).count() == 0:
-        return {"message": "Category is empty!"}
-    return db.query(models.Category).all()
+    categories = db.query(models.Category).all()
+    return categories  # Returns [] if empty (NOT a dict)
 
 
+# ✅ FIXED: Returns empty list [] instead of dict
 @router.get("/product-list", response_model=List[schemas.ProductDisplay])
 def get_products(skip: int = 0, limit: int = 100, db: Session = Depends(database.get_db)):
-    if db.query(models.Product).count() == 0:
-        return {"message": "Product is empty!"}
-    return db.query(models.Product).offset(skip).limit(limit).all()
+    products = db.query(models.Product).offset(skip).limit(limit).all()
+    return products  # Returns [] if empty
 
 
+# ✅ FIXED: Returns empty list [] or raise 404 for invalid category
 @router.get("/product-by-category-list/{category_id}", response_model=List[schemas.ProductDisplay])
 def get_products_by_category(category_id: int, db: Session = Depends(database.get_db)):
-    if db.query(models.Product).filter(models.Product.category_id == category_id).count() == 0:
-        return {"message": "Category invalid!"}
-    return db.query(models.Product).filter(models.Product.category_id == category_id).all()
+    # Optional: Check if category exists
+    category = db.query(models.Category).filter(models.Category.id == category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
 
+    products = db.query(models.Product).filter(models.Product.category_id == category_id).all()
+    return products  # Returns [] if no products in category
 
 @router.post("/add-to-cart")
 def add_to_cart(
