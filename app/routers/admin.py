@@ -177,7 +177,32 @@ def delete_order(order_id: int, db: Session = Depends(database.get_db), admin: m
 
 # --- REPORTS ---
 @router.get("/reports/sale")
-def get_sales_report(db: Session = Depends(database.get_db), admin: models.User = Depends(get_current_admin_user)):
-    total_orders = db.query(models.Order).count()
-    revenue = db.query(models.Order).sum(models.Order.total_amount)
-    return {"total_orders": total_orders, "total_revenue": revenue[0] or 0}
+def get_sales_report(
+        db: Session = Depends(database.get_db),
+        admin: models.User = Depends(get_current_admin_user)
+):
+    try:
+        # Count total orders
+        total_orders = db.query(models.Order).count()
+
+        # Sum total revenue
+        revenue_result = db.query(models.Order).sum(models.Order.total_amount)
+
+        # Handle None/empty result
+        total_revenue = revenue_result[0] if revenue_result and revenue_result[0] else 0
+
+        return {
+            "total_orders": total_orders,
+            "total_revenue": float(total_revenue) if total_revenue else 0.0
+        }
+    except Exception as e:
+        # Log the error
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"ERROR in get_sales_report: {error_trace}")
+
+        # Return error (in production, you might want to handle this differently)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Database error: {str(e)}"
+        )
