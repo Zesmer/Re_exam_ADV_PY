@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from .. import schemas, models, security, database
 from typing import List
 
@@ -186,7 +187,7 @@ def get_sales_report(
         total_orders = db.query(models.Order).count()
 
         # Sum total revenue
-        revenue_result = db.query(models.Order).sum(models.Order.total_amount)
+        revenue_result = db.query(func.sum(models.Order.total_amount)).scalar()
 
         # Handle None/empty result
         total_revenue = revenue_result[0] if revenue_result and revenue_result[0] else 0
